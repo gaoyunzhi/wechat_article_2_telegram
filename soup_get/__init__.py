@@ -12,6 +12,8 @@ class SoupGet(object):
 	def getAccountNewArticle(self, name):
 		content = cached_url.get(
 			domain + account_search_prefix + name)
+		with open('tmp/account.html', 'w') as f:
+			f.write(content)
 		soup = BeautifulSoup(content, 'html.parser')
 		item = soup.find('a', uigs='account_article_0')
 		return item and domain + item['href']
