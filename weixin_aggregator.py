@@ -126,6 +126,7 @@ def loop():
 	threading.Timer(60 * 60, loop).start() 
 
 if __name__ == '__main__':
+	print('=====start======')
 	if 'once' not in sys.argv:
 		threading.Timer(1, loop).start()
 	else:
