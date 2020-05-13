@@ -27,5 +27,4 @@ class SoupGet(object):
 		for x in parts[1:]:
 			url.append(x.split("';")[0])
 		url = ''.join(url).replace('@', '')
-		print('article_url', url)
 		return url
