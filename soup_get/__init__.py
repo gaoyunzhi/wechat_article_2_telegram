@@ -16,8 +16,16 @@ class SoupGet(object):
 		item = soup.find('a', uigs='account_article_0')
 		return item and domain + item['href']
 
-	def getArticle(self, url):
-		return cached_url.get(
+	def getArticleUrl(self, url):
+		content = cached_url.get(
 			url,
 			force_cache=True,
 			headers = {'cookie': credential['cookie']})
+		# 为反爬，搜狗会返回一段js，我们来parse这段js
+		parts = content.split("url += '")
+		url = []
+		for x in parts[1:]:
+			url.append(x.split("';")[0])
+		url = ''.join(url).replace('@', '')
+		print('article_url', url)
+		return url
