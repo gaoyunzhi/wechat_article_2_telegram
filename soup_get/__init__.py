@@ -11,7 +11,8 @@ with open('credential') as f:
 class SoupGet(object):
 	def getAccountNewArticle(self, name):
 		content = cached_url.get(
-			domain + account_search_prefix + name)
+			domain + account_search_prefix + name, 
+			headers = {'cookie': credential['cookie']})
 		with open('tmp/account.html', 'w') as f:
 			f.write(content)
 		soup = BeautifulSoup(content, 'html.parser')
