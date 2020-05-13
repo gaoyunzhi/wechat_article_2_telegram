@@ -26,15 +26,17 @@ db = DB()
 def processUser(user):
 	url = sg.getAccountNewArticle(user)
 	if not url:
+		print('no first article:', user)
 		return
 	wx_url = sg.getArticleUrl(url) # populate cache, because we need specific header
 	if wx_url in db.existing.items:
 		return
 	r = export_to_telegraph.export(wx_url, force_cache=True)
 	if not r:
+		print('cannot export', wx_url)
 		return
 	tags = ' '.join(['#%s' % x for x in getTags(r)])
-	message = '[%s](%s) | [source](%s) \n#%s %s' % (r, r, wx_url, user, tags)
+	message = '[%s](%s)\n#%s %s [source](%s)' % (r, r, user.replace(' ', '_'), tags, wx_url)
 	channel.send_message(message, parse_mode='Markdown')
 	# todo: add more tags
 	if 'test' not in sys.argv:
