@@ -13,10 +13,11 @@ class SoupGet(object):
 		content = cached_url.get(
 			domain + account_search_prefix + name, 
 			headers = {'cookie': credential['cookie']})
-		with open('tmp/account.html', 'w') as f:
-			f.write(content)
 		soup = BeautifulSoup(content, 'html.parser')
 		item = soup.find('a', uigs='account_article_0')
+		if not item:
+			with open('tmp/account.html', 'w') as f:
+				f.write(content)
 		return item and domain + item['href']
 
 	def getArticleUrl(self, url):
