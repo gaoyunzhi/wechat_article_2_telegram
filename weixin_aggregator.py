@@ -17,6 +17,7 @@ import time
 import cached_url
 from telegram_util import AlbumResult as Result
 import album_sender
+import random
 
 with open('credential') as f:
 	credential = yaml.load(f, Loader=yaml.FullLoader)
@@ -95,7 +96,9 @@ def processUser(user):
 @log_on_fail(debug_group)
 def loopImp():
 	db.reload()
-	for user in db.users.items:
+	users = list(db.existing.items)
+	random.shuffle(users)
+	for user in users:
 		processUser(user)
 	print('loop finished')
 	command = 'git add . > /dev/null 2>&1 && git commit -m auto_commit > /dev/null 2>&1 && git push -u -f > /dev/null 2>&1'
