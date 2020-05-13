@@ -10,6 +10,7 @@ import yaml
 from soup_get import SoupGet
 from db import DB
 import threading
+from tags import getTags
 
 with open('credential') as f:
 	credential = yaml.load(f, Loader=yaml.FullLoader)
@@ -32,7 +33,8 @@ def processUser(user):
 	r = export_to_telegraph.export(wx_url, force_cache=True)
 	if not r:
 		return
-	message = '%s | [%s](%s) | [原文](%s)' % (user, r, r, wx_url)
+	tags = ' '.join(['#%s' % x for x in getTags(r)])
+	message = '[%s](%s) | [source](%s) \n#%s %s' % (r, r, wx_url, user, tags)
 	channel.send_message(message, parse_mode='Markdown')
 	# todo: add more tags
 	if 'test' not in sys.argv:
