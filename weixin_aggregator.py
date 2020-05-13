@@ -29,8 +29,7 @@ def processUser(user):
 	wx_url = sg.getArticleUrl(url) # populate cache, because we need specific header
 	if wx_url in db.existing.items:
 		return
-	r = export_to_telegraph.export(
-		wx_url, force=True, force_cache=True)
+	r = export_to_telegraph.export(wx_url, force_cache=True)
 	if not r:
 		return
 	message = '%s | [%s](%s) | [原文](%s)' % (user, r, r, wx_url)
