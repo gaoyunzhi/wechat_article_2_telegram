@@ -11,6 +11,8 @@ from soup_get import SoupGet
 from db import DB
 import threading
 from tags import getTags
+import readee
+from bs4 import BeautifulSoup
 
 with open('credential') as f:
 	credential = yaml.load(f, Loader=yaml.FullLoader)
@@ -23,6 +25,17 @@ channel = tele.bot.get_chat(-1001402364957)
 sg = SoupGet()
 db = DB()
 
+def sendTelegraph(r, user, wx_url):
+	tags = ' '.join(['#%s' % x for x in getTags(r)])
+	message = '[%s](%s)\n#%s %s [source](%s)' % (r, r, user.replace(' ', '_'), tags, wx_url)
+	channel.send_message(message, parse_mode='Markdown')
+
+def senImage(user, wx_url):
+	content = cached_url.get(wx_url, force_cache=True)
+	b = BeautifulSoup(content, 'html.parser')
+	print(str(b))
+	# TODO
+
 def processUser(user):
 	url = sg.getAccountNewArticle(user)
 	if not url:
@@ -33,11 +46,8 @@ def processUser(user):
 		return
 	r = export_to_telegraph.export(wx_url, force_cache=True)
 	if not r:
-		print('cannot export', wx_url)
-		return
-	tags = ' '.join(['#%s' % x for x in getTags(r)])
-	message = '[%s](%s)\n#%s %s [source](%s)' % (r, r, user.replace(' ', '_'), tags, wx_url)
-	channel.send_message(message, parse_mode='Markdown')
+		sendImage(user, wx_url)
+	sendTelegraph(r, user, wx_url)
 	# todo: add more tags
 	if 'test' not in sys.argv:
 		db.existing.add(wx_url)
@@ -45,7 +55,7 @@ def processUser(user):
 @log_on_fail(debug_group)
 def loopImp():
 	db.reload()
-	for user in db.users.items:
+	for user in ['尖椒部落']: #db.users.items:
 		processUser(user)
 	print('loop finished')
 	command = 'git add . > /dev/null 2>&1 && git commit -m auto_commit > /dev/null 2>&1 && git push -u -f > /dev/null 2>&1'
