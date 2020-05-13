@@ -31,55 +31,66 @@ db = DB()
 
 def sendTelegraph(r, user, source_url):
 	tags = ' '.join(['#%s' % x for x in getTags(r)])
-	message = '[%s](%s)\n#%s %s' % (
-		r, r, user.replace(' ', '_'), tags)
+	message = '[%s](%s)\n#%s %s' % (r, r, user, tags)
 	if source_url:
 		message += ' [source](%s)' % source_url
 	try:
 		channel.send_message(message, parse_mode='Markdown')
 	except Exception as e:
 		print(str(e))
-		print(message)
+		print(message, source_url)
 
-def sendImage(user, wx_url, source_url):
-	telegraph_url = export_to_telegraph.export(wx_url, force_cache=True, force=True)
-	if not telegraph_url:
-		return
+def getSoup(telegraph_url):
 	content = cached_url.get('https://' + telegraph_url, force_cache=True)
-	b = BeautifulSoup(content, 'html.parser')
+	return BeautifulSoup(content, 'html.parser')
+
+def getTitle(telegraph_url):
+	return getSoup(telegraph_url).find('h1').text.strip()
+
+def sendImage(user, telegraph_url, source_url):
 	r = Result()
-	r.cap = b.find('h1').text + ' #%s' % user
-	r.imgs = [x['src'] for x in b.find_all('img')]
+	r.cap = getTitle(telegraph_url) + ' #%s' % user
+	r.imgs = [x['src'] for x in getSoup(telegraph_url).find_all('img')]
 	if not r.imgs:
 		return
-	album_sender.send(channel, source_url or telegraph_url, r)
+	album_sender.send(channel, source_url, r)
 
 def goodUrl(url):
 	return url.count('*') <= 1 and url.count('..') == 0
 
-def getUrl(*args):
+def getGoodUrl(*args):
 	for url in args:
 		if goodUrl(url):
 			return url
 
 def processUser(user):
 	if 'test' not in str(sys.argv):
-		time.sleep(10)
+		time.sleep(60)
+
 	url = sg.getAccountNewArticle(user)
 	if not url:
 		print('no first article:', user)
 		return
 	wx_url = sg.getArticleUrl(url) # populate cache, because we need specific header
-	if wx_url in db.existing.items:
+
+	telegraph_url = export_to_telegraph.export(wx_url, force_cache=True)
+	telegraph_force_url = export_to_telegraph.export(wx_url, force_cache=True, force=True)
+	if not telegraph_force_url:
 		return
-	r = export_to_telegraph.export(wx_url, force_cache=True)
-	source_url = getUrl(url, wx_url) # otherwise the url does not parse to telegram
-	if r:
-		sendTelegraph(r, user, source_url)
+
+	title = getTitle(telegraph_force_url)
+	if title in db.existing.items:
+		return
+
+	source_url = getGoodUrl(url, wx_url, telegraph_force_url)
+	user = user.replace(' ', '\\_')
+	if telegraph_url:
+		sendTelegraph(telegraph_url, user, source_url)
 	else:
-		sendImage(user, wx_url, source_url)
+		sendImage(user, telegraph_force_url, source_url)
+
 	if 'test' not in str(sys.argv):
-		db.existing.add(wx_url)
+		db.existing.add(title)
 
 @log_on_fail(debug_group)
 def loopImp():
