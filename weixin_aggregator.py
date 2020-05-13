@@ -124,9 +124,5 @@ def loop():
 if __name__ == '__main__':
 	if 'once' not in sys.argv:
 		threading.Timer(1, loop).start()
-		tele.dispatcher.add_handler(MessageHandler(
-			Filters.update.channel_post & Filters.command, command))
-		tele.start_polling()
-		tele.idle()
 	else:
 		loopImp()
