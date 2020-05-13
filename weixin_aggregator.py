@@ -111,7 +111,11 @@ def process(url):
 def loopImp():
 	db.reload()
 	for user in db.users.items:
-		print(sg.getAccountNewArticle(user))
+		url = sg.getAccountNewArticle(user)
+		if not url:
+			continue
+		result = export_to_telegraph.export(url, force_cache=True)
+		print(result)
 	print('loop finished')
 	command = 'git add . > /dev/null 2>&1 && git commit -m commit > /dev/null 2>&1 && git push -u -f > /dev/null 2>&1'
 	os.system(command)
