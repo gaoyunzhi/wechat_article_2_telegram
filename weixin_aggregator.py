@@ -114,6 +114,7 @@ def loopImp():
 		url = sg.getAccountNewArticle(user)
 		if not url:
 			continue
+		print(url)
 		result = export_to_telegraph.export(url, force=True, throw_exception=True, force_cache=True)
 		print(result)
 	print('loop finished')
