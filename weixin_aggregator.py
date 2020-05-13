@@ -10,11 +10,9 @@ import time
 import yaml
 import web_2_album
 import album_sender
-from soup_get import SoupGet, Timer
+from soup_get import SoupGet
 from db import DB
 import threading
-import weibo_2_album
-import urllib
 
 with open('credential') as f:
 	credential = yaml.load(f, Loader=yaml.FullLoader)
@@ -26,7 +24,6 @@ channel = tele.bot.get_chat(-1001374366482)
 
 sg = SoupGet()
 db = DB()
-timer = Timer()
 
 LINK_KEYS = ['http', 'www', 'com', 'cn', 'telegra', '']
 
@@ -112,20 +109,9 @@ def process(url):
 
 @log_on_fail(debug_group)
 def loopImp():
-	removeOldFiles('tmp')
-	removeOldFiles('tmp_image')
-	sg.reset()
 	db.reload()
-	for keyword in db.keywords.items:
-		content_id = urllib.request.pathname2url('100103type=1&q=' + keyword)
-		url = 'https://m.weibo.cn/api/container/getIndex?containerid=%s&page_type=searchall' % content_id
-		process(url)
-		print(keyword)
 	for user in db.users.items:
-		url = 'https://m.weibo.cn/api/container/getIndex?type=uid&value=%s&containerid=107603%s' \
-			% (user, user)
-		process(url)
-		print(user)
+		print(sg.getAccountNewArticle(user))
 	print('loop finished')
 	command = 'git add . > /dev/null 2>&1 && git commit -m commit > /dev/null 2>&1 && git push -u -f > /dev/null 2>&1'
 	os.system(command)
@@ -135,18 +121,12 @@ def loop():
 	loopImp()
 	threading.Timer(60 * 60, loop).start() 
 
-@log_on_fail(debug_group)
-def command(update, context):
-	msg= update.channel_post
-	if not msg.text.startswith('/w'):
-		return
-	# TODO: add command to add user, add keyword, refer douban code if needed
-
-if 'once' not in sys.argv:
-	threading.Timer(1, loop).start()
-	tele.dispatcher.add_handler(MessageHandler(
-		Filters.update.channel_post & Filters.command, command))
-	tele.start_polling()
-	tele.idle()
-else:
-	loopImp()
+if __name__ == '__main__':
+	if 'once' not in sys.argv:
+		threading.Timer(1, loop).start()
+		tele.dispatcher.add_handler(MessageHandler(
+			Filters.update.channel_post & Filters.command, command))
+		tele.start_polling()
+		tele.idle()
+	else:
+		loopImp()
