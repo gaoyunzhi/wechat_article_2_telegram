@@ -33,7 +33,7 @@ def processUser(user):
 		wx_url, force=True, force_cache=True)
 	if not r:
 		return
-	message = '[%s](%s) | [原文](%s) \n#%s' % (r, r, wx_url, user)
+	message = '%s | [%s](%s) | [原文](%s)' % (user, r, r, wx_url)
 	channel.send_message(message, parse_mode='Markdown')
 	# todo: add more tags
 	if 'test' not in sys.argv:
