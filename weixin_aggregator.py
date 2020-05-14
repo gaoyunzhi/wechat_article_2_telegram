@@ -92,16 +92,16 @@ def processUser(user):
 
 	if 'test' not in str(sys.argv):
 		db.existing.add(title)
-	if sent:
-		return
+	return sent
 
 @log_on_fail(debug_group)
 def loopImp():
 	db.reload()
-	users = list(db.existing.items)
+	users = list(db.users.items)
 	random.shuffle(users)
 	for user in users:
-		processUser(user)
+		if processUser(user):
+			break
 	print('loop finished')
 	command = 'git add . > /dev/null 2>&1 && git commit -m auto_commit > /dev/null 2>&1 && git push -u -f > /dev/null 2>&1'
 	os.system(command)
