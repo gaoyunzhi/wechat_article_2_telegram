@@ -36,7 +36,7 @@ def sendTelegraph(r, user, source_url):
 	if source_url:
 		message += ' [source](%s)' % source_url
 	try:
-		channel.send_message(message, parse_mode='Markdown')
+		return channel.send_message(message, parse_mode='Markdown')
 	except Exception as e:
 		print(str(e))
 		print(message, source_url)
@@ -54,7 +54,7 @@ def sendImage(user, telegraph_url, source_url):
 	r.imgs = [x['src'] for x in getSoup(telegraph_url).find_all('img')]
 	if not r.imgs:
 		return
-	album_sender.send(channel, source_url, r)
+	return album_sender.send(channel, source_url, r)
 
 def goodUrl(url):
 	return url.count('*') <= 1 and url.count('..') == 0
@@ -86,12 +86,14 @@ def processUser(user):
 	source_url = getGoodUrl(url, wx_url, telegraph_force_url)
 	user = user.replace(' ', '\\_')
 	if telegraph_url:
-		sendTelegraph(telegraph_url, user, source_url)
+		sent = sendTelegraph(telegraph_url, user, source_url)
 	else:
-		sendImage(user, telegraph_force_url, source_url)
+		sent = sendImage(user, telegraph_force_url, source_url)
 
 	if 'test' not in str(sys.argv):
 		db.existing.add(title)
+	if sent:
+		return
 
 @log_on_fail(debug_group)
 def loopImp():
@@ -107,7 +109,7 @@ def loopImp():
 
 def loop():
 	loopImp()
-	threading.Timer(60 * 60, loop).start() 
+	threading.Timer(30 * 60, loop).start() 
 
 if __name__ == '__main__':
 	print('=====start======')
