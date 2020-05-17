@@ -84,7 +84,7 @@ def processUser(user):
 		return
 
 	source_url = getGoodUrl(url, wx_url, telegraph_force_url)
-	user = user.replace(' ', '\\_')
+	user = user.replace(' ', '\_')
 	if telegraph_url:
 		sent = sendTelegraph(telegraph_url, user, source_url)
 	else:
