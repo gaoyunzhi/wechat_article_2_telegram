@@ -73,6 +73,7 @@ def processUser(user):
 		print('no first article:', user)
 		return
 	wx_url = sg.getArticleUrl(url) # populate cache, because we need specific header
+	print(wx_url)
 
 	telegraph_url = export_to_telegraph.export(wx_url, force_cache=True)
 	telegraph_force_url = export_to_telegraph.export(wx_url, force_cache=True, force=True)
