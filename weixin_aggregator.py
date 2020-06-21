@@ -67,6 +67,7 @@ def getGoodUrl(*args):
 def processUser(user):
 	if 'test' not in str(sys.argv):
 		time.sleep(60)
+	print(user)
 
 	url = sg.getAccountNewArticle(user)
 	if not url:
